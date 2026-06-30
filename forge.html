@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الحدّاد الأسطوري — ورشة تطوير الأسلحة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-0:#15100c;
+    --bg-1:#1f1712;
+    --panel:#241a14;
+    --ember:#ff7a30;
+    --ember-2:#ff4e1f;
+    --gold:#ffc34d;
+    --steel:#9aa1a8;
+    --steel-dim:#5d6469;
+    --text:#f1e7d8;
+    --text-dim:#b8a98f;
+    --good:#7ed98a;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(ellipse 800px 500px at 50% -10%, rgba(255,122,48,.10), transparent 60%),
+      var(--bg-0);
+    font-family:'Tajawal','Cairo',sans-serif;
+    color:var(--text);
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{
+    max-width:920px;
+    margin:0 auto;
+    padding:18px 14px 60px;
+  }
+
+  /* ---------- HEADER ---------- */
+  header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:14px 18px;
+    background:linear-gradient(180deg, var(--panel), var(--bg-1));
+    border:1px solid #3a291c;
+    border-radius:14px;
+    margin-bottom:16px;
+  }
+  header h1{
+    font-family:'Cairo',sans-serif;
+    font-weight:900;
+    font-size:20px;
+    margin:0;
+    letter-spacing:.5px;
+    color:var(--gold);
+    text-shadow:0 0 18px rgba(255,195,77,.25);
+  }
+  header .tag{
+    font-size:12px;
+    color:var(--text-dim);
+    margin-top:2px;
+  }
+  .gold-pill{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    background:#1a120c;
+    border:1px solid #4a3320;
+    padding:8px 14px;
+    border-radius:999px;
+    font-weight:700;
+    font-size:16px;
+    color:var(--gold);
+    white-space:nowrap;
+  }
+  .gold-pill .coin{
+    width:18px;height:18px;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #ffe9b0, var(--gold) 55%, #b3811a 100%);
+    box-shadow:0 0 8px rgba(255,195,77,.6);
+  }
+
+  /* ---------- MAIN GRID ---------- */
+  .grid{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:16px;
+  }
+  @media(min-width:760px){
+    .grid{grid-template-columns: 1.15fr .85fr;}
+  }
+
+  /* ---------- FORGE PANEL ---------- */
+  .forge-card{
+    background:linear-gradient(180deg, var(--panel), var(--bg-1));
+    border:1px solid #3a291c;
+    border-radius:18px;
+    padding:22px;
+    position:relative;
+    overflow:hidden;
+    text-align:center;
+  }
+  .forge-card::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:radial-gradient(circle at 50% 110%, rgba(255,78,31,.35), transparent 60%);
+    pointer-events:none;
+  }
+  .weapon-name{
+    font-family:'Cairo',sans-serif;
+    font-weight:900;
+    font-size:22px;
+    color:var(--text);
+    margin:0 0 2px;
+  }
+  .weapon-sub{
+    font-size:13px;
+    color:var(--text-dim);
+    margin-bottom:18px;
+  }
+
+  .anvil-zone{
+    position:relative;
+    width:220px;
+    height:220px;
+    margin:0 auto 18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    user-select:none;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .anvil-glow{
+    position:absolute;
+    width:160px;height:160px;
+    border-radius:50%;
+    background:radial-gradient(circle, rgba(255,122,48,.45), transparent 70%);
+    filter:blur(2px);
+    animation:pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes pulse{
+    0%,100%{transform:scale(1); opacity:.7;}
+    50%{transform:scale(1.12); opacity:1;}
+  }
+  .anvil-svg{
+    position:relative;
+    z-index:2;
+    width:140px;
+    height:140px;
+    transition:transform .08s ease;
+    filter:drop-shadow(0 6px 10px rgba(0,0,0,.5));
+  }
+  .anvil-zone.struck .anvil-svg{ transform:scale(.92) rotate(-1deg); }
+  .anvil-zone .hint{
+    position:absolute;
+    bottom:-26px;
+    font-size:12px;
+    color:var(--text-dim);
+  }
+
+  .spark{
+    position:absolute;
+    width:5px;height:5px;
+    border-radius:50%;
+    background:var(--gold);
+    box-shadow:0 0 6px 1px var(--ember);
+    pointer-events:none;
+    z-index:3;
+  }
+  .floater{
+    position:absolute;
+    font-weight:800;
+    font-size:15px;
+    color:var(--gold);
+    pointer-events:none;
+    z-index:4;
+    text-shadow:0 1px 2px rgba(0,0,0,.6);
+  }
+
+  .forge-stats{
+    display:flex;
+    justify-content:center;
+    gap:22px;
+    margin-top:6px;
+    font-size:13px;
+    color:var(--text-dim);
+  }
+  .forge-stats b{ color:var(--gold); font-size:14px; }
+
+  .progress-wrap{
+    margin-top:18px;
+    text-align:right;
+  }
+  .progress-label{
+    display:flex;
+    justify-content:space-between;
+    font-size:12px;
+    color:var(--text-dim);
+    margin-bottom:6px;
+  }
+  .progress-bar{
+    height:10px;
+    border-radius:6px;
+    background:#1a120c;
+    border:1px solid #3a291c;
+    overflow:hidden;
+  }
+  .progress-fill{
+    height:100%;
+    background:linear-gradient(90deg, var(--ember-2), var(--gold));
+    border-radius:6px;
+    transition:width .25s ease;
+  }
+
+  /* ---------- SIDEBAR ---------- */
+  .side{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  .panel{
+    background:linear-gradient(180deg, var(--panel), var(--bg-1));
+    border:1px solid #3a291c;
+    border-radius:16px;
+    padding:16px;
+  }
+  .panel h2{
+    font-family:'Cairo',sans-serif;
+    font-size:15px;
+    font-weight:700;
+    margin:0 0 12px;
+    color:var(--steel);
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .upgrade{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:10px 12px;
+    border-radius:12px;
+    background:#1a120c;
+    border:1px solid #34251a;
+    margin-bottom:8px;
+  }
+  .upgrade:last-child{margin-bottom:0;}
+  .upgrade .info{ text-align:right; }
+  .upgrade .info .name{ font-size:13.5px; font-weight:700; color:var(--text); }
+  .upgrade .info .desc{ font-size:11.5px; color:var(--text-dim); margin-top:1px;}
+  .upgrade .info .lvl{ font-size:11px; color:var(--steel-dim); margin-top:2px;}
+  .upgrade button{
+    flex-shrink:0;
+    background:linear-gradient(180deg, #ff8a3d, var(--ember-2));
+    color:#1a0e05;
+    border:none;
+    border-radius:10px;
+    font-weight:800;
+    font-size:12.5px;
+    padding:9px 12px;
+    cursor:pointer;
+    min-width:78px;
+    transition:transform .08s ease, filter .15s ease;
+  }
+  .upgrade button:disabled{
+    background:#2a2118;
+    color:var(--steel-dim);
+    cursor:not-allowed;
+  }
+  .upgrade button:not(:disabled):active{ transform:scale(.95); }
+
+  .weapon-list{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+  .weapon-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    font-size:13px;
+    padding:7px 10px;
+    border-radius:8px;
+  }
+  .weapon-row.unlocked{ color:var(--text); background:rgba(255,195,77,.06); }
+  .weapon-row.locked{ color:var(--steel-dim); }
+  .weapon-row .badge{
+    font-size:10px;
+    padding:2px 7px;
+    border-radius:6px;
+    font-weight:700;
+  }
+  .weapon-row.unlocked .badge{ background:rgba(126,217,138,.15); color:var(--good); }
+  .weapon-row.locked .badge{ background:rgba(255,255,255,.05); color:var(--steel-dim); }
+
+  footer{
+    text-align:center;
+    color:var(--steel-dim);
+    font-size:11.5px;
+    margin-top:22px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <h1>🔥 الحدّاد الأسطوري</h1>
+      <div class="tag">ورشة تطوير الأسلحة الخيالية</div>
+    </div>
+    <div class="gold-pill"><span class="coin"></span><span id="goldCount">0</span></div>
+  </header>
+
+  <div class="grid">
+    <!-- FORGE -->
+    <div class="forge-card">
+      <div class="weapon-name" id="weaponName">دبّوس خشبي</div>
+      <div class="weapon-sub" id="weaponSub">أضعف سلاح في الورشة... لنبدأ الطّرق</div>
+
+      <div class="anvil-zone" id="anvilZone">
+        <div class="anvil-glow"></div>
+        <svg class="anvil-svg" viewBox="0 0 200 160" fill="none">
+          <ellipse cx="100" cy="148" rx="70" ry="8" fill="#000" opacity=".35"/>
+          <rect x="92" y="60" width="16" height="70" rx="3" fill="#4a4f55"/>
+          <path d="M30 60 Q30 40 60 40 H140 Q170 40 170 60 V72 H30 Z" fill="#7d8389"/>
+          <path d="M30 60 H170 V72 H30 Z" fill="#5d6469"/>
+          <rect x="15" y="40" width="40" height="22" rx="6" fill="#7d8389"/>
+          <rect x="145" y="40" width="40" height="22" rx="6" fill="#7d8389"/>
+          <ellipse cx="100" cy="40" rx="55" ry="9" fill="#9aa1a8"/>
+          <ellipse cx="100" cy="36" rx="50" ry="7" fill="#b6bcc1"/>
+        </svg>
+        <div class="hint">اضغط للطّرق</div>
+      </div>
+
+      <div class="forge-stats">
+        <div>لكل ضربة: <b id="perClick">+1</b></div>
+        <div>تلقائياً: <b id="perSecond">0</b>/ث</div>
+      </div>
+
+      <div class="progress-wrap">
+        <div class="progress-label">
+          <span id="nextWeaponLabel">حتى السلاح التالي</span>
+          <span id="progressNums">0 / 50</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div class="side">
+      <div class="panel">
+        <h2>⚒️ ترقيات الورشة</h2>
+        <div class="upgrade">
+          <div class="info">
+            <div class="name">مطرقة أثقل</div>
+            <div class="desc">تزيد الذهب لكل ضربة</div>
+            <div class="lvl">المستوى: <span id="hammerLvl">0</span></div>
+          </div>
+          <button id="buyHammer">شراء<br><span id="hammerCost">10</span> 🪙</button>
+        </div>
+        <div class="upgrade">
+          <div class="info">
+            <div class="name">عامل فرن</div>
+            <div class="desc">يصنع ذهباً تلقائياً كل ثانية</div>
+            <div class="lvl">المستوى: <span id="furnaceLvl">0</span></div>
+          </div>
+          <button id="buyFurnace">شراء<br><span id="furnaceCost">25</span> 🪙</button>
+        </div>
+        <div class="upgrade">
+          <div class="info">
+            <div class="name">سندان مسحور</div>
+            <div class="desc">يضاعف كل ضربة بفرصة 15%</div>
+            <div class="lvl">المستوى: <span id="critLvl">0</span></div>
+          </div>
+          <button id="buyCrit">شراء<br><span id="critCost">60</span> 🪙</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>📜 سجل الأسلحة المكتشفة</h2>
+        <div class="weapon-list" id="weaponList"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>لعبة خفيفة وهمية بالكامل — لا تحتوي على معلومات حقيقية عن أسلحة. تقدّمك لا يُحفظ بعد إغلاق الصفحة.</footer>
+</div>
+
+<script>
+(function(){
+  const weapons = [
+    {name:"دبّوس خشبي", sub:"أضعف سلاح في الورشة... لنبدأ الطّرق", at:0},
+    {name:"خنجر صدئ", sub:"أول خطوة نحو الشهرة", at:50},
+    {name:"سيف فولاذي", sub:"يلمع تحت ضوء الفرن", at:250},
+    {name:"فأس المحارب", sub:"ثقيل، لكنه يفتح الطريق", at:900},
+    {name:"قوس النسر", sub:"دقة من مسافة بعيدة", at:2500},
+    {name:"رمح العاصفة", sub:"يصدر صوت رعد عند كل طرقة", at:6000},
+    {name:"درع التنين", sub:"مصهور من حراشف أسطورية", at:15000},
+    {name:"سيف النجوم", sub:"يُقال إنه سقط من السماء", at:35000},
+    {name:"مطرقة الجبّار", sub:"تهزّ الورشة بأكملها", at:80000},
+    {name:"شفرة الفجر الأبدي", sub:"تحفة الحدّاد الأسطوري", at:200000},
+  ];
+
+  let gold = 0;
+  let totalEarned = 0;
+  let clickPower = 1;
+  let perSecond = 0;
+  let hammerLvl = 0, furnaceLvl = 0, critLvl = 0;
+  let hammerCost = 10, furnaceCost = 25, critCost = 60;
+
+  const $ = id => document.getElementById(id);
+  const goldCount = $('goldCount');
+  const anvilZone = $('anvilZone');
+  const weaponName = $('weaponName');
+  const weaponSub = $('weaponSub');
+  const perClickEl = $('perClick');
+  const perSecondEl = $('perSecond');
+  const progressFill = $('progressFill');
+  const progressNums = $('progressNums');
+  const nextWeaponLabel = $('nextWeaponLabel');
+  const weaponList = $('weaponList');
+
+  function fmt(n){
+    n = Math.floor(n);
+    if(n >= 1e6) return (n/1e6).toFixed(2)+'م';
+    if(n >= 1e3) return n.toLocaleString('ar-EG');
+    return n.toString();
+  }
+
+  function currentWeaponIndex(){
+    let idx = 0;
+    for(let i=0;i<weapons.length;i++){
+      if(totalEarned >= weapons[i].at) idx = i; else break;
+    }
+    return idx;
+  }
+
+  function renderWeaponPanel(){
+    const idx = currentWeaponIndex();
+    const cur = weapons[idx];
+    const next = weapons[idx+1];
+    weaponName.textContent = cur.name;
+    weaponSub.textContent = cur.sub;
+    if(next){
+      nextWeaponLabel.textContent = `حتى ${next.name}`;
+      const span = next.at - cur.at;
+      const have = Math.min(totalEarned - cur.at, span);
+      progressNums.textContent = `${fmt(have)} / ${fmt(span)}`;
+      progressFill.style.width = Math.min(100,(have/span)*100) + '%';
+    } else {
+      nextWeaponLabel.textContent = 'اكتمل السجل الأسطوري! 🏆';
+      progressNums.textContent = '✓';
+      progressFill.style.width = '100%';
+    }
+  }
+
+  function renderWeaponList(){
+    weaponList.innerHTML = '';
+    const idx = currentWeaponIndex();
+    weapons.forEach((w,i)=>{
+      const row = document.createElement('div');
+      const unlocked = i <= idx;
+      row.className = 'weapon-row ' + (unlocked ? 'unlocked':'locked');
+      row.innerHTML = `<span>${unlocked ? w.name : '????'}</span><span class="badge">${unlocked ? 'مكتسب':'مقفل'}</span>`;
+      weaponList.appendChild(row);
+    });
+  }
+
+  function renderTop(){
+    goldCount.textContent = fmt(gold);
+    perClickEl.textContent = '+' + fmt(clickPower);
+    perSecondEl.textContent = fmt(perSecond);
+  }
+
+  function updateButtons(){
+    $('hammerCost').textContent = fmt(hammerCost);
+    $('furnaceCost').textContent = fmt(furnaceCost);
+    $('critCost').textContent = fmt(critCost);
+    $('hammerLvl').textContent = hammerLvl;
+    $('furnaceLvl').textContent = furnaceLvl;
+    $('critLvl').textContent = critLvl;
+    $('buyHammer').disabled = gold < hammerCost;
+    $('buyFurnace').disabled = gold < furnaceCost;
+    $('buyCrit').disabled = gold < critCost;
+  }
+
+  function earn(amount){
+    gold += amount;
+    totalEarned += amount;
+    renderTop();
+    renderWeaponPanel();
+    renderWeaponList();
+    updateButtons();
+  }
+
+  function spawnSparks(x,y){
+    for(let i=0;i<7;i++){
+      const s = document.createElement('div');
+      s.className = 'spark';
+      const angle = Math.random()*Math.PI*2;
+      const dist = 30 + Math.random()*40;
+      s.style.left = x+'px';
+      s.style.top = y+'px';
+      anvilZone.appendChild(s);
+      const dx = Math.cos(angle)*dist;
+      const dy = Math.sin(angle)*dist - 20;
+      s.animate([
+        {transform:'translate(0,0)', opacity:1},
+        {transform:`translate(${dx}px, ${dy}px)`, opacity:0}
+      ], {duration:450+Math.random()*200, easing:'ease-out'}).onfinish = ()=> s.remove();
+    }
+  }
+
+  function spawnFloater(x,y,text){
+    const f = document.createElement('div');
+    f.className = 'floater';
+    f.textContent = text;
+    f.style.left = x+'px';
+    f.style.top = y+'px';
+    anvilZone.appendChild(f);
+    f.animate([
+      {transform:'translate(-50%, 0)', opacity:1},
+      {transform:'translate(-50%, -50px)', opacity:0}
+    ], {duration:700, easing:'ease-out'}).onfinish = ()=> f.remove();
+  }
+
+  anvilZone.addEventListener('click', (e)=>{
+    const rect = anvilZone.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    let gain = clickPower;
+    let isCrit = false;
+    if(critLvl > 0 && Math.random() < 0.15*critLvl){
+      gain *= 2;
+      isCrit = true;
+    }
+    earn(gain);
+    spawnSparks(x,y);
+    spawnFloater(x,y, (isCrit? '×2 ':'') + '+' + fmt(gain));
+
+    anvilZone.classList.add('struck');
+    setTimeout(()=> anvilZone.classList.remove('struck'), 90);
+  });
+
+  $('buyHammer').addEventListener('click', ()=>{
+    if(gold < hammerCost) return;
+    gold -= hammerCost;
+    hammerLvl++;
+    clickPower += 1 + Math.floor(hammerLvl*0.5);
+    hammerCost = Math.floor(hammerCost * 1.55) + 5;
+    renderTop(); updateButtons();
+  });
+
+  $('buyFurnace').addEventListener('click', ()=>{
+    if(gold < furnaceCost) return;
+    gold -= furnaceCost;
+    furnaceLvl++;
+    perSecond += 2 + Math.floor(furnaceLvl*0.8);
+    furnaceCost = Math.floor(furnaceCost * 1.6) + 10;
+    renderTop(); updateButtons();
+  });
+
+  $('buyCrit').addEventListener('click', ()=>{
+    if(gold < critCost || critLvl >= 5) return;
+    gold -= critCost;
+    critLvl++;
+    critCost = Math.floor(critCost * 1.9) + 20;
+    if(critLvl >= 5){ $('buyCrit').textContent = 'الحد الأقصى'; $('buyCrit').disabled = true; }
+    renderTop(); updateButtons();
+  });
+
+  setInterval(()=>{
+    if(perSecond > 0) earn(perSecond/10);
+  }, 100);
+
+  renderTop();
+  renderWeaponPanel();
+  renderWeaponList();
+  updateButtons();
+})();
+</script>
+</body>
+</html>
